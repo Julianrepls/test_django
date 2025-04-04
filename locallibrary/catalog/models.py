@@ -25,7 +25,7 @@ class Book(models.Model):
 
     title = models.CharField(max_length=200)
 
-    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True) 
     # ForeignKey, ya que un libro tiene un solo autor, pero el mismo autor puede haber escrito muchos libros.
     # 'Author' es un string, en vez de un objeto, porque la clase Author aún no ha sido declarada.
 
