@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from .models import Book, Author, BookInstance, Genre
@@ -43,3 +43,26 @@ class AuthorListView(generic.ListView):
 
 class AuthorDetailView(generic.DetailView):
     model = Author
+
+
+
+
+
+
+###################################
+
+def author_detail(request, author_id):
+    # Obtener el autor o devolver un error 404 si no existe
+    author = get_object_or_404(Author, id=author_id)
+
+    # Obtener todos los libros escritos por este autor
+    books = Book.objects.filter(author=author)
+
+    return render(request, 'catalog/author_detail.html', {'author': author, 'books': books})
+
+def book_detail(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    return render(request, 'catalog/book_detail.html', {'book': book})
+
+
+
