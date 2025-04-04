@@ -8,26 +8,65 @@
   <div style="margin-left:20px;margin-right:20px;margin-top:30px">
     <h4>Books</h4>
     {% if books %}
-    <ul>
+      <ul>
         {% for book in books %}
-          {% for copy in book.bookinstance_set.all %}
-            <li><a href="{% url 'book-detail' book.id %}">{{ book.title }} ({{copy.imprint}})</a>  </li>
-            <p> (Resumen: {{ book.summary }})</p>
-          {% endfor %}
+          <li>
+            <a href="{% url 'book-detail' book.id %}">{{ book.title }}</a>  
+            <strong>({{ book.num_copies }} copias disponibles)</strong>
+          </li>
+          <p><span>Resumen:</span> {{ book.summary }}</p>
+
+          <!-- Mostrar las copias de este libro -->
+          {% if book.bookinstance_set.all %}
+            <ul>
+              {% for copy in book.bookinstance_set.all %}
+                <li>
+                  <strong>Impresión:</strong> {{ copy.imprint }}  
+                  - Estado: {{ copy.get_status_display }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No hay copias disponibles de este libro.</p>
+          {% endif %}
         {% endfor %}
+      </ul>
+    {% else %}
+      <p>Este autor no tiene libros registrados.</p>
+    {% endif %}
 
 
-        <!--{% for copy in book.bookinstance_set.all %}  
-             
-          <p><strong>Imprimir:</strong> {{copy.imprint}}</p>
-            
-        {% endfor %}-->
-        
-    </ul>
-{% else %}
-    <p>Este autor no tiene libros registrados.</p>
-{% endif %}
 
+
+
+
+
+
+
+
+
+    <!--{% if books %}
+      <ul>
+          {% for book in books %}
+            {% for copy in book.bookinstance_set.all %}
+              <p><a href="{% url 'book-detail' book.id %}">{{ book.title }} ({{copy.imprint}})</a></p>
+              <p>Resumen: {{ book.summary }}</p>
+            {% endfor %}
+          {% endfor %}
+
+          
+
+
+          {% for copy in book.bookinstance_set.all %}  
+              
+            <p><strong>Imprimir:</strong> {{copy.imprint}}</p>
+              
+          {% endfor %}
+          
+      </ul>
+  {% else %}
+      <p>Este autor no tiene libros registrados.</p>
+  {% endif %}-->
 
   </div>
 {% endblock %}

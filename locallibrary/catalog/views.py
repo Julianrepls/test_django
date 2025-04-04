@@ -46,11 +46,6 @@ class AuthorDetailView(generic.DetailView):
 
 
 
-
-
-
-###################################
-
 def author_detail(request, author_id):
     # Obtener el autor o devolver un error 404 si no existe
     author = get_object_or_404(Author, id=author_id)
@@ -58,6 +53,11 @@ def author_detail(request, author_id):
     # Obtener todos los libros escritos por este autor
     books = Book.objects.filter(author=author)
 
+####################################
+    # Obtener el número de copias para cada libro
+    for book in books:
+        book.num_copies = book.bookinstance_set.count()
+# Pasar los libros al contexto junto con el número de copias
     return render(request, 'catalog/author_detail.html', {'author': author, 'books': books})
 
 def book_detail(request, book_id):
