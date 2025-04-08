@@ -3,6 +3,9 @@ from . import views
 from .views import author_detail #recuerda esto lo hacemos para poder usar la vista author_detail que hemos creado en views.py
 from .views import book_detail # recuerda esto lo hacemos para poder usar la vista book_detail que hemos creado en views.py
 
+
+
+
 #estos son nuestros mapeadores de URL
 urlpatterns = [
     path('', views.index, name='index'),                                # esta línea se encarga de mostrar la página de inicio
@@ -12,7 +15,11 @@ urlpatterns = [
     path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),  
     path('author/<int:author_id>/', author_detail, name='author-detail'),
     path('book/<int:book_id>/', book_detail, name='book-detail'),
-              
+    path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'), #Configuración URL para libros alquilados
+    path('allborrowed/', views.LoanedBooksForLibrariansListView.as_view(), name='all-borrowed'),
+    path('borrowed/', views.LoanedBooksAllListView.as_view(), name='all-borrowed'),
+
+
     #path('myurl/<fish>', views.my_view, {'my_template_name': 'some_path'}, name='aurl'), # esta línea se encarga de mostrar una vista personalizada con un template específico. Esto está enlazado a la vista my_view en views.py con el html de book_list.html
 
 

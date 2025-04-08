@@ -1,0 +1,38 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Libros Prestados</h1>
+
+  {% if bookinstance_list %}
+  <ul>
+    {% for bookinst in bookinstance_list %}
+    <li class="{% if bookinst.is_overdue %}text-danger{% endif %}"> <!-- Si el libro está atrasado, se le asigna la clase text-danger para que se muestre en rojo. -->
+      <a href="{% url 'book-detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> ({{ bookinst.due_back|date:"d/m/Y" }})
+      - Prestado a: {{ bookinst.borrower.get_full_name }}
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% else %}
+    <p>No hay libros prestados actualmente.</p>
+  {% endif %}
+
+  <!-- Paginación -->
+  {% if is_paginated %}
+  <div class="pagination">
+    <span class="step-links">
+      {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; primera</a>
+        <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+      {% endif %}
+      <span class="current">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+      </span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">siguiente</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">última &raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+  {% endif %}
+{% endblock %}

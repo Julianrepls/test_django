@@ -16,47 +16,96 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
   <img src="{% static 'catalog/images/pexels1.jpg' %}" alt="My image" style="width:400px;height:400px;"/> -->
-  
+   
 
 </head>
 
 <body>
+    <!-- HEADER BAR AQUÍ -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="{% url 'index' %}">Local Library</a>
+          <!-- <a class="navbar-brand navbar-center" href="{% url 'index' %}">Local Library</a>     Esto sería alternativa para ponerle en el centro de la barra superior-->
+        </div>
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="{% url 'index' %}">Inicio</a></li>
+          <li><a href="{% url 'books' %}">Libros</a></li>
+          <li><a href="{% url 'authors' %}">Autores</a></li>
+        </ul>
+      
+      
+        <!-- OPCIONES A LA DERECHA -->
 
+      </div>
+    </nav>
+
+
+  
   <div class="container-fluid">
 
     <div class="row">
-      <div class="col-sm-2"> 
+      <div class="col-sm-2 sidebar-custom"> 
       {% block sidebar %}
       <ul class="sidebar-nav">
-        <li><a href="{% url 'index' %}">Home</a></li>
-        <li><a href="{% url 'books' %}">All books</a></li>  <!-- URL para ver todos los libros, esto lo hacemos después de crear el templates/catalog/book_list.html. Para que tenga acceso a la plantilla genérica (extend) y luego como el código como queremos que se vea esa página  -->
-        <li><a href="{% url 'authors' %}">All authors</a></li> <!-- URL para ver el autor de un libro, esto lo hacemos después de crear el templates/catalog/autor_list.html. Para que tenga acceso a la plantilla genérica (extend) y luego como el código como queremos que se vea esa página  --> 
+        <li><a href="{% url 'index' %}">Inicio</a></li>
+        <li><a href="{% url 'books' %}">Todos los libros</a></li>  <!-- URL para ver todos los libros, esto lo hacemos después de crear el templates/catalog/book_list.html. Para que tenga acceso a la plantilla genérica (extend) y luego como el código como queremos que se vea esa página  -->
+        <li><a href="{% url 'authors' %}">Todos los autores</a></li> <!-- URL para ver el autor de un libro, esto lo hacemos después de crear el templates/catalog/autor_list.html. Para que tenga acceso a la plantilla genérica (extend) y luego como el código como queremos que se vea esa página  --> 
+        
+        <br>
+
+        
+      {% if user.is_authenticated %}
+        <li>User: {{ user.get_username }}</li>
+        <li><a href="{% url 'my-borrowed' %}">Mis libros prestados</a></li>
+        <li>
+          <form method="post" action="{% url 'logout' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" style="background:none; border:none; padding:0; margin:0; color:#337ab7; cursor:pointer;">
+                  Cerrar sesión
+              </button>
+          </form>
+      </li>
+      {% else %}
+        <li><a href="{% url 'login'%}?next={{request.path}}">Iniciar sesión</a></li>
+      {% endif %}
+        <hr>
+      {% if perms.catalog.can_mark_returned %}
+        <li>Staff: {{ user.get_username }}</li>
+        <li><a href="{% url 'all-borrowed' %}">Todos los préstamos</a></li>
+      {% endif %}
+
       </ul>
      {% endblock %}
       </div>
-      <div class="col-sm-10 ">
-      {% block content %}{% endblock %}
+      <div class="col-sm-10" >  <!-- Columna para el contenido de la página, en este caso el contenido de la página principal. -->
+        <div class="main">
+          {% block content %}
+    
+          {% endblock %}
 
 
-      {% block pagination %}
-        {% if is_paginated %}
-            <div class="pagination">
-                <span class="page-links">
-                    {% if page_obj.has_previous %}
-                        <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">anterior</a>
-                    {% endif %}
-                    <span class="page-current">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+          {% block pagination %}
+            {% if is_paginated %}
+                <div class="pagination">
+                    <span class="page-links">
+                        {% if page_obj.has_previous %}
+                            <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">anterior</a>
+                        {% endif %}
+                        <span class="page-current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                        {% if page_obj.has_next %}
+                            <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">siguiente</a>
+                        {% endif %}
                     </span>
-                    {% if page_obj.has_next %}
-                        <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">siguiente</a>
-                    {% endif %}
-                </span>
-            </div>
-        {% endif %}
+                </div>
+            {% endif %}
 
 
-      {% endblock %}
+          {% endblock %}
+        </div> <!-- Fin de la columna principal -->
+        
 
     
       </div>
