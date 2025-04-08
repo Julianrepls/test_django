@@ -19,6 +19,9 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +30,9 @@ urlpatterns = [
 urlpatterns += [
     path('catalog/', include('catalog.urls')),
     path('', RedirectView.as_view(url='/catalog/', permanent=True)),
+    path('accounts/', include('django.contrib.auth.urls')), #con esto hacemos el inicio de sesión
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'), #con este hacemos el cierre de sesión
+   
 
 ]
 

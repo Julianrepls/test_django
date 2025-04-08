@@ -1,6 +1,58 @@
 .sidebar-nav {
-    margin-top: 20px;
-    padding: 0;
+    margin-top: 80px;
+    margin-left: 20px;
+    padding: 0px;
     list-style: none;
+    font-size: 16px;
   }
+
+
+
+
+.sidebar-custom {
+  margin-left: 0px; /* Ajusta el margen izquierdo según tus necesidades */
+  background-color: #f5f5f5; /* Fondo gris claro */
+  min-height: 100vh;         /* Para que ocupe toda la altura de la pantalla */
+  padding: 18px;             /* Espacio interno */
+  border-right: 1px solid #ccc; /* Línea divisoria a la derecha */
+  width: 200px; /* Ajusta el ancho según tus necesidades */
   
+  
+}
+
+.main {
+  margin-top: 60px;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  margin-left: 40px;
+}
+
+/*
+.navbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+*/
+
+
+
+/* Aplica el estilo de navbar a botones dentro de formularios
+.navbar-nav form button {
+  background: none;
+  border: none;
+  padding: 15px 20px;
+  color: #9d9d9d;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.navbar-nav form button:hover,
+.navbar-nav form button:focus {
+  color: #fff;
+  background-color: transparent;
+  text-decoration: none;
+}
+ */

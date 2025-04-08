@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse #Used to generate URLs by reversing the URL patterns
 import uuid # Requerida para las instancias de libros únicos
+from django.contrib.auth.models import User
+from datetime import date
 
 # Create your models here.
 
@@ -78,10 +80,19 @@ class BookInstance(models.Model):
     )
 
     status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='m', help_text='Disponibilidad del libro')
+    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         ordering = ["due_back"]
+        permissions = [
+            ("can_mark_returned", "Set book as returned"),
+        ]
 
+    @property # En este apartado se define una propiedad para decir si una instancia particular de un libro está atrasada
+    def is_overdue(self):
+        if self.due_back and date.today() > self.due_back:
+            return True
+        return False
 
     def __str__(self):
         """
@@ -116,9 +127,6 @@ class Author(models.Model):
         """
         return '%s, %s' % (self.last_name, self.first_name)
     
-
-
-
 
 
 
