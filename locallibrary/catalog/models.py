@@ -33,11 +33,17 @@ class Book(models.Model):
 
     summary = models.TextField(max_length=1000, help_text="Ingrese una breve descripción del libro")
 
+
     isbn = models.CharField('ISBN',max_length=13, help_text='13 Caracteres <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
 
     genre = models.ManyToManyField(Genre, help_text="Seleccione un genero para este libro")
     # ManyToManyField, porque un género puede contener muchos libros y un libro puede cubrir varios géneros.
     # La clase Genre ya ha sido definida, entonces podemos especificar el objeto arriba.
+
+    class Meta:
+        permissions = [
+            ("can_mark_returned", "Can mark books as returned"),
+        ]
 
     def __str__(self):
         """
@@ -103,7 +109,6 @@ class BookInstance(models.Model):
     
     
 
-
 class Author(models.Model):
 
     """
@@ -113,6 +118,11 @@ class Author(models.Model):
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     date_of_death = models.DateField('Died', null=True, blank=True)
+
+    class Meta:
+        permissions = [
+        ("can_mark_returned", "Can mark books as returned"),
+    ]
 
     def get_absolute_url(self):
         """

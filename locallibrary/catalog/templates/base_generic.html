@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  
 
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
@@ -40,7 +41,22 @@
       </div>
     </nav>
 
-
+    <!-- FIN HEADER BAR -->
+    <!-- Aquí empieza el contenido de la página web, en este caso el contenido de la página principal. 
+    <section id="inicio">
+      <div class="contenido">
+          
+          <div class="presentacion">
+              <p class="bienvenida">Welcome</p>
+              <h2> It's <span> The Library</span>, Books Web</h2>
+              <p class="descripcion">" The present is theirs; the future, for which I really worked, is mine" Nikola Tesla</p>
+              
+              <a href="#portfolio">Ir a Portafolio</a>
+          </div> 
+                   
+      </div>
+  </section>
+-->
   
   <div class="container-fluid">
 
@@ -57,7 +73,6 @@
         
       {% if user.is_authenticated %}
         <li>User: {{ user.get_username }}</li>
-        <li><a href="{% url 'my-borrowed' %}">Mis libros prestados</a></li>
         <li>
           <form method="post" action="{% url 'logout' %}" style="display:inline;">
               {% csrf_token %}
@@ -66,6 +81,9 @@
               </button>
           </form>
       </li>
+      <hr>
+      <li><a href="{% url 'my-borrowed' %}">Mis libros prestados</a></li>
+        
       {% else %}
         <li><a href="{% url 'login'%}?next={{request.path}}">Iniciar sesión</a></li>
       {% endif %}
@@ -73,6 +91,14 @@
       {% if perms.catalog.can_mark_returned %}
         <li>Staff: {{ user.get_username }}</li>
         <li><a href="{% url 'all-borrowed' %}">Todos los préstamos</a></li>
+        <hr>
+        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'author-list-for-librarians' %}">Lista de Autores</a></li>
+        <li><a href="{% url 'author-list-for-librarians' %}">Modificar Autor</a></li>
+        <hr>
+        <li><a href="{% url 'book-create-with-instance' %}">Crear Libro</a></li>
+        <li><a href="{% url 'book-list-for-librarians' %}">🗑️ Eliminar Libros</a></li>
+    
       {% endif %}
 
       </ul>
