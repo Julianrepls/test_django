@@ -1,0 +1,65 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <h2 class="text-center">Crear Libro y Copias</h2>
+
+  <form method="post" class="form-horizontal" novalidate>
+    {% csrf_token %}
+
+    <!-- Sección del libro -->
+    <div class="panel panel-primary">
+      <div class="panel-heading"><strong>Información del Libro</strong></div>
+      <div class="panel-body">
+        {% for field in form %}
+          <div class="form-group {% if field.errors %}has-error{% endif %}">
+            <label class="control-label col-sm-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <div class="col-sm-10">
+              {{ field }}
+              {% if field.help_text %}
+                <p class="help-block">{{ field.help_text }}</p>
+              {% endif %}
+              {% for error in field.errors %}
+                <p class="help-block"><strong>{{ error }}</strong></p>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Sección de copias -->
+    <div class="panel panel-info">
+      <div class="panel-heading"><strong>Copias del Libro</strong></div>
+      <div class="panel-body">
+        {{ instance_formset.management_form }}
+        {% for form in instance_formset %}
+          <div class="well well-sm">
+            {% for field in form %}
+              <div class="form-group {% if field.errors %}has-error{% endif %}">
+                <label class="control-label col-sm-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="col-sm-10">
+                  {{ field }}
+                  {% if field.help_text %}
+                    <p class="help-block">{{ field.help_text }}</p>
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p class="help-block"><strong>{{ error }}</strong></p>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Botón de envío -->
+    <div class="form-group text-center">
+      <button type="submit" class="btn btn-success">Guardar</button>
+      <a href="{% url 'books' %}" class="btn btn-default">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

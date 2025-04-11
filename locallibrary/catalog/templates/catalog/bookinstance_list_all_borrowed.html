@@ -5,12 +5,20 @@
 
   {% if bookinstance_list %}
   <ul>
+
     {% for bookinst in bookinstance_list %}
     <li class="{% if bookinst.is_overdue %}text-danger{% endif %}"> <!-- Si el libro está atrasado, se le asigna la clase text-danger para que se muestre en rojo. -->
       <a href="{% url 'book-detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> ({{ bookinst.due_back|date:"d/m/Y" }})
       - Prestado a: {{ bookinst.borrower.get_full_name }}
     </li>
+
+    <p>
+      {% if perms.catalog.can_mark_returned %}
+        <a href="{% url 'renew-book-librarian' bookinst.id %}">Renew</a>
+      {% endif %}
+    </p>
     {% endfor %}
+    
   </ul>
 
   {% else %}

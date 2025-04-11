@@ -1,11 +1,22 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 # Create your views here.
 from .models import Book, Author, BookInstance, Genre
-from django.views import generic # esta linea se encarga de importar la clase generic de django.views
+from django.views import generic# esta linea se encarga de importar la clase generic de django.views
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
+from django.views.generic import ListView, DeleteView
 from django.contrib.auth.mixins import PermissionRequiredMixin
+
+import datetime
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .forms import RenewBookForm, BookForm, BookInstanceForm
+from django.contrib.auth.decorators import permission_required
+
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.forms import inlineformset_factory
+
 
 
 
@@ -48,6 +59,8 @@ class BookDetailView(generic.DetailView):
 
 class AuthorListView(generic.ListView):
     model = Author
+    template_name = 'catalog/author_list.html'
+    context_object_name = 'author_list'
 
 
 class AuthorDetailView(generic.DetailView):
@@ -92,10 +105,6 @@ class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
 
 
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.views import generic
-from .models import BookInstance
 
 class LoanedBooksForLibrariansListView(LoginRequiredMixin, PermissionRequiredMixin, generic.ListView):
     """
@@ -129,3 +138,135 @@ class LoanedBooksAllListView(PermissionRequiredMixin, generic.ListView):
         return BookInstance.objects.filter(status__exact='o').order_by('due_back')
 
 
+
+@permission_required('catalog.can_mark_returned')
+def renew_book_librarian(request, pk):
+    """
+    View function for renewing a specific BookInstance by librarian
+    """
+    book_inst=get_object_or_404(BookInstance, pk = pk)
+
+    # If this is a POST request then process the Form data
+    if request.method == 'POST':
+
+        # Create a form instance and populate it with data from the request (binding):
+        form = RenewBookForm(request.POST)
+
+        # Check if the form is valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
+            book_inst.due_back = form.cleaned_data['renewal_date']
+            book_inst.save()
+
+            # redirect to a new URL:
+            return HttpResponseRedirect(reverse('all-borrowed') )
+
+    # If this is a GET (or any other method) create the default form.
+    else:
+        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
+
+    return render(request, 'catalog/book_renew_librarian.html', {'form': form, 'bookinst':book_inst})
+
+
+
+#@permission_required('catalog.can_mark_returned', raise_exception=True)
+class AuthorCreate(PermissionRequiredMixin, CreateView):
+    model = Author
+    fields = '__all__'
+    initial = {'date_of_death': '05/01/2018'}
+    # template_name = 'catalog/author_form.html'  
+    success_url = '/catalog/authors/'  # Redirige a la lista de autores después de crear un nuevo autor
+    permission_required = 'catalog.can_mark_returned'
+
+#@permission_required('catalog.can_mark_returned', raise_exception=True)
+class AuthorUpdate(PermissionRequiredMixin, UpdateView):
+    model = Author
+    fields = ['first_name','last_name','date_of_birth','date_of_death']
+    template_name = 'catalog/author_form.html'
+    success_url = reverse_lazy('author-list-for-librarians')  # Redirige a la lista de autores después de actualizar
+    permission_required = 'catalog.can_mark_returned'
+
+
+#@permission_required('catalog.can_mark_returned', raise_exception=True)
+class AuthorDelete(PermissionRequiredMixin, DeleteView):
+    model = Author
+    success_url = reverse_lazy('authors')
+    template_name = 'catalog/author_confirm_delete.html'
+    permission_required = 'catalog.can_mark_returned'
+
+
+
+class AuthorListForLibrarians(PermissionRequiredMixin, ListView):
+    model = Author
+    template_name = 'catalog/author_list_for_librarians.html'
+    permission_required = 'catalog.can_mark_returned'
+    paginate_by = 10
+
+
+######### SECCIÓN DE MODIFICACIONES DE LIBROS #########
+class BookCreate(PermissionRequiredMixin, CreateView):
+    model = Book
+    fields = '__all__'  # Puedes usar una lista específica si quieres más control
+    permission_required = 'catalog.can_mark_returned'
+    success_url = '/catalog/books/' 
+
+
+
+
+
+
+
+BookInstanceFormSet = inlineformset_factory(
+    Book,
+    BookInstance,
+    fields=('imprint', 'due_back', 'status'),
+    extra=3,
+    can_delete=False
+)
+
+
+# con esta vista podemos crear un libro y varias instancias de él al mismo tiempo.
+# Esto es útil si quieres añadir varias copias de un libro al mismo tiempo.
+class BookCreateWithInstance(PermissionRequiredMixin, CreateView):
+    model = Book
+    form_class = BookForm
+    template_name = 'catalog/book_with_instance_form.html'
+    permission_required = 'catalog.can_mark_returned'
+    success_url = '/catalog/books/'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        if self.request.POST:
+            data['instance_formset'] = BookInstanceFormSet(self.request.POST)
+        else:
+            data['instance_formset'] = BookInstanceFormSet()
+        return data
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        instance_formset = context['instance_formset']
+
+        if instance_formset.is_valid():
+            self.object = form.save()
+            instances = instance_formset.save(commit=False)
+            for instance in instances:
+                instance.book = self.object
+                instance.save()
+            return redirect(self.success_url)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+# Vista para mostrar la lista de libros para bibliotecarios, pretendo crearla para que solo ellos puedan eliminar libros desde ahí
+class BookListViewForLibrarians(PermissionRequiredMixin, ListView):
+    model = Book
+    template_name = 'catalog/book_list_for_librarians.html'  # Nueva plantilla para la vista de libros para bibliotecarios
+    context_object_name = 'books'
+    permission_required = 'catalog.can_mark_returned'
+
+
+class BookDelete(DeleteView):
+    model = Book
+    success_url = reverse_lazy('books')  # Redirige a la lista de libros después de eliminar
+    template_name = 'catalog/book_confirm_delete.html'

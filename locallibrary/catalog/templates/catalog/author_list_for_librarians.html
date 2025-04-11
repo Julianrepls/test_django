@@ -1,0 +1,49 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Lista de Autores</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Fecha de Nacimiento</th>
+      <th>Fecha de Fallecimiento</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for author in author_list %}
+      <tr>
+        <td>{{ author.first_name }} {{ author.last_name }}</td>
+        <td>{{ author.date_of_birth }}</td>
+        <td>{{ author.date_of_death }}</td>
+        <td>
+          <a href="{% url 'author-update' author.pk %}" class="btn btn-primary btn-sm">Modificar</a>
+          <a href="{% url 'author-delete' author.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    <li {% if not page_obj.has_previous %} class="disabled" {% endif %}>
+      <a href="?page=1">&laquo;</a>
+    </li>
+    <li {% if not page_obj.has_previous %} class="disabled" {% endif %}>
+      <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+    </li>
+    <li {% if not page_obj.has_next %} class="disabled" {% endif %}>
+      <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+    </li>
+    <li {% if not page_obj.has_next %} class="disabled" {% endif %}>
+      <a href="?page={{ page_obj.paginator.num_pages }}">»</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
