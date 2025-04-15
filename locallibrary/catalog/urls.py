@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import author_detail #recuerda esto lo hacemos para poder usar la vista author_detail que hemos creado en views.py
 from .views import book_detail # recuerda esto lo hacemos para poder usar la vista book_detail que hemos creado en views.py
-from .views import AuthorDelete, AuthorListView, AuthorUpdate, AuthorListForLibrarians, BookCreate, BookCreateWithInstance, BookDelete
+from .views import AuthorDelete, AuthorListView, AuthorUpdate, AuthorListForLibrarians, BookCreate, BookCreateWithInstance, BookDelete, LoanedBooksForLibrariansListView, LoanedBooksAllListView, renew_book_librarian
 
 
 #estos son nuestros mapeadores de URL
@@ -15,10 +15,13 @@ urlpatterns = [
     path('author/<int:author_id>/', author_detail, name='author-detail'),
     path('book/<int:book_id>/', book_detail, name='book-detail'),
     path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),                #Configuración URL para libros alquilados por el usuario
-    path('allborrowed/', views.LoanedBooksForLibrariansListView.as_view(), name='all-borrowed'),    #Configuración URL para libros alquilados para bibliotecarios 
-    path('borrowed/', views.LoanedBooksAllListView.as_view(), name='all-borrowed'),                 #Configuración URL para libros alquilados para todos los usuarios
-    path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),         #esta línea se encarga de mostrar la vista de renovación de libros. Esto está enlazado a la vista renew_book_librarian en views.py con el html de book_list.html
-    
+    #path('allborrowed/', views.LoanedBooksForLibrariansListView.as_view(), name='all-borrowed'),    #Configuración URL para libros alquilados para bibliotecarios 
+    path('allborrowed/', LoanedBooksForLibrariansListView.as_view(), name='all-borrowed'),
+    #path('borrowed/', views.LoanedBooksAllListView.as_view(), name='all-borrowed'),                 #Configuración URL para libros alquilados para todos los usuarios
+    #path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),         #esta línea se encarga de mostrar la vista de renovación de libros. Esto está enlazado a la vista renew_book_librarian en views.py con el html de book_list.html
+    path('borrowed/', LoanedBooksAllListView.as_view(), name='all-borrowed'),
+    path('book/<uuid:pk>/renew/', renew_book_librarian, name='renew-book-librarian'),
+
     path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
     path('author/<int:pk>/delete/', AuthorDelete.as_view(), name='author-delete'),
     path('author/<int:pk>/update/', AuthorUpdate.as_view(), name='author-update'),
@@ -32,6 +35,10 @@ urlpatterns = [
     path('book/create/', views.BookCreateWithInstance.as_view(), name='book-create'),
     path('books/librarians/', views.BookListViewForLibrarians.as_view(), name='book-list-for-librarians'),
     path('book/<int:pk>/delete/', BookDelete.as_view(), name='book-delete'),
+    
+    
+    path('books/available/', views.AvailableBooksView.as_view(), name='available-books'),
+    path('book/<uuid:pk>/lend/', views.lend_book_librarian, name='lend-book-librarian'),
 
 
 

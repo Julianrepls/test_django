@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Libros Disponibles</h1>
+  {% if book_instances %}
+    <ul>
+      {% for instance in book_instances %}
+        <li>
+          {{ instance.book.title }} (ID: {{ instance.id }})
+          <a href="{% url 'lend-book-librarian' instance.id %}">
+            <button>Prestar</button>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No hay libros disponibles en este momento.</p>
+  {% endif %}
+{% endblock %}
