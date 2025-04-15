@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Prestar Libro: {{ bookinst.book.title }}</h1>
+  
+  {% if error %}
+    <p style="color: red;">{{ error }}</p>
+  {% else %}
+    <form action="" method="post">
+      {% csrf_token %}
+      <table>
+        {{ form.as_table }}
+      </table>
+      <input type="submit" value="Prestar">
+    </form>
+  {% endif %}
+{% endblock %}

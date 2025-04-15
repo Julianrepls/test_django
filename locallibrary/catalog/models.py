@@ -92,6 +92,7 @@ class BookInstance(models.Model):
         ordering = ["due_back"]
         permissions = [
             ("can_mark_returned", "Set book as returned"),
+             ("can_manage_books", "Can manage book instances"),
         ]
 
     @property # En este apartado se define una propiedad para decir si una instancia particular de un libro está atrasada

@@ -2,20 +2,24 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 # Create your views here.
 from .models import Book, Author, BookInstance, Genre
-from django.views import generic# esta linea se encarga de importar la clase generic de django.views
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic, View                  # esta linea se encarga de importar la clase generic de django.views
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, DeleteView
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+
 
 import datetime
+from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
-from django.urls import reverse
-from .forms import RenewBookForm, BookForm, BookInstanceForm
+from django.urls import reverse, reverse_lazy
+from .forms import RenewBookForm, BookForm, LendBookForm
 from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
 
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+
 from django.forms import inlineformset_factory
+
+
 
 
 
@@ -204,12 +208,13 @@ class AuthorListForLibrarians(PermissionRequiredMixin, ListView):
     paginate_by = 10
 
 
-######### SECCIÓN DE MODIFICACIONES DE LIBROS #########
+#------------------- VISTAS PARA CREAR LIBROS -------------------
 class BookCreate(PermissionRequiredMixin, CreateView):
     model = Book
     fields = '__all__'  # Puedes usar una lista específica si quieres más control
     permission_required = 'catalog.can_mark_returned'
     success_url = '/catalog/books/' 
+
 
 
 
@@ -258,7 +263,8 @@ class BookCreateWithInstance(PermissionRequiredMixin, CreateView):
             return self.render_to_response(self.get_context_data(form=form))
 
 
-# Vista para mostrar la lista de libros para bibliotecarios, pretendo crearla para que solo ellos puedan eliminar libros desde ahí
+# Vista para mostrar la lista de libros para bibliotecarios, pretendo crearla para que solo ellos puedan eliminar
+#  libros desde ahí
 class BookListViewForLibrarians(PermissionRequiredMixin, ListView):
     model = Book
     template_name = 'catalog/book_list_for_librarians.html'  # Nueva plantilla para la vista de libros para bibliotecarios
@@ -267,6 +273,58 @@ class BookListViewForLibrarians(PermissionRequiredMixin, ListView):
 
 
 class BookDelete(DeleteView):
+
     model = Book
     success_url = reverse_lazy('books')  # Redirige a la lista de libros después de eliminar
     template_name = 'catalog/book_confirm_delete.html'
+
+
+
+
+
+
+
+#--------------- VISTA PARA PRESTAR LIBROS ------------------        
+@method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
+class AvailableBooksView(ListView):
+    model = BookInstance
+    template_name = 'catalog/available_books.html'
+    context_object_name = 'book_instances'
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(status='a')
+    
+
+
+@permission_required('catalog.can_mark_returned')
+def lend_book_librarian(request, pk):
+    """
+    View function for lending a specific BookInstance by librarian
+    """
+    book_inst = get_object_or_404(BookInstance, pk=pk)
+
+    # Check if the book is available
+    if book_inst.status != 'a':
+        return render(request, 'catalog/book_lend_librarian.html', {
+            'form': None,
+            'bookinst': book_inst,
+            'error': 'Este libro no está disponible para prestar.'
+        })
+
+    # If this is a POST request, process the form data
+    if request.method == 'POST':
+        form = LendBookForm(request.POST)
+        if form.is_valid():
+            book_inst.borrower = form.cleaned_data['borrower']
+            book_inst.due_back = form.cleaned_data['due_back']
+            book_inst.status = 'o'  # Set status to "On loan"
+            book_inst.save()
+            return HttpResponseRedirect(reverse('available-books'))
+    else:
+        proposed_due_back = datetime.today().date() + timedelta(weeks=3)
+        form = LendBookForm(initial={'due_back': proposed_due_back})
+
+    return render(request, 'catalog/book_lend_librarian.html', {
+        'form': form,
+        'bookinst': book_inst
+    })
