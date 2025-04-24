@@ -1,19 +1,52 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Libros Disponibles</h1>
-  {% if book_instances %}
-    <ul>
+<h1>Libros Disponibles</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Título</th>
+      <th>ID</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if book_instances %}
       {% for instance in book_instances %}
-        <li>
-          {{ instance.book.title }} (ID: {{ instance.id }})
-          <a href="{% url 'lend-book-librarian' instance.id %}">
-            <button>Prestar</button>
-          </a>
-        </li>
+        <tr>
+          <td>{{ instance.book.title }}</td>
+          <td>{{ instance.id }}</td>
+          <td>
+            <a href="{% url 'lend-book-librarian' instance.id %}" class="btn btn-primary btn-sm">Prestar</a>
+          </td>
+        </tr>
       {% endfor %}
-    </ul>
-  {% else %}
-    <p>No hay libros disponibles en este momento.</p>
-  {% endif %}
+    {% else %}
+      <tr>
+        <td colspan="3" class="text-center">No hay libros disponibles en este momento.</td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- Paginación (si es necesaria) -->
+{% if is_paginated %}
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    <li {% if not page_obj.has_previous %} class="page-item disabled" {% else %} class="page-item" {% endif %}>
+      <a class="page-link" href="?page=1">&laquo;</a>
+    </li>
+    <li {% if not page_obj.has_previous %} class="page-item disabled" {% else %} class="page-item" {% endif %}>
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+    </li>
+    <li {% if not page_obj.has_next %} class="page-item disabled" {% else %} class="page-item" {% endif %}>
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+    </li>
+    <li {% if not page_obj.has_next %} class="page-item disabled" {% else %} class="page-item" {% endif %}>
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
 {% endblock %}

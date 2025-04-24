@@ -40,6 +40,8 @@ urlpatterns = [
     path('books/available/', views.AvailableBooksView.as_view(), name='available-books'),
     path('book/<uuid:pk>/lend/', views.lend_book_librarian, name='lend-book-librarian'),
 
+    path('book/<uuid:pk>/return/', views.mark_book_returned, name='mark-returned'),
+
 
 
     

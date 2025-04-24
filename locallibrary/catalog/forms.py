@@ -5,28 +5,24 @@ from .models import Book, User
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-import datetime #para comprobar la fecha de hoy en el renovar libro
-from datetime import datetime
+#import datetime #para comprobar la fecha de hoy en el renovar libro
+from datetime import date, timedelta
 
 # -------------- formulario para renovar libros --------------
 class RenewBookForm(forms.Form):
-    renewal_date = forms.DateField(
-        #widget=forms.TextInput(attrs={'type': 'date'}),     # si qito este comentario con este comando no me deja poner la fecha en el formulario pero en su lugar me pone un calendario.
-        help_text="Enter a date between now and 4 weeks (default 3)."
-        )
+    renewal_date = forms.DateField(help_text="Introduce una fecha entre hoy y 4 semanas (por defecto es 3 semanas).")
 
     def clean_renewal_date(self):
         data = self.cleaned_data['renewal_date']
+        
+        # Verifica que la fecha no esté en el pasado
+        if data < date.today():
+            raise forms.ValidationError("La fecha no puede estar en el pasado.")
 
-        #Check date is not in past.
-        if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
+        # Verifica que no pase de 4 semanas en el futuro
+        if data > date.today() + timedelta(weeks=4):
+            raise forms.ValidationError("La fecha no puede estar más allá de 4 semanas en el futuro.")
 
-        #Check date is in range librarian allowed to change (+4 weeks).
-        if data > datetime.date.today() + datetime.timedelta(weeks=4):
-            raise ValidationError(_('Invalid date - renewal more than 4 weeks ahead'))
-
-        # Remember to always return the cleaned data.
         return data
 
 
@@ -54,6 +50,6 @@ class LendBookForm(forms.Form):
 
     def clean_due_back(self):
         date = self.cleaned_data['due_back']
-        if date < datetime.today().date():
+        if date < date.today():
             raise ValidationError("La fecha de devolución no puede ser en el pasado.")
         return date

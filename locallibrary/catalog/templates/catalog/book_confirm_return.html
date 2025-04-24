@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Confirmar devolución</h1>
+  <p>¿Estás seguro de que quieres marcar el siguiente libro como devuelto?</p>
+  <ul>
+    <li><strong>{{ bookinst.book.title }}</strong></li>
+    <li>Prestado a: {{ bookinst.borrower.get_full_name }}</li>
+    <li>Fecha de devolución: {{ bookinst.due_back }}</li>
+  </ul>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Confirmar devolución</button>
+    <a href="{% url 'all-borrowed' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+{% endblock %}

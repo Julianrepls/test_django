@@ -8,8 +8,8 @@ from django.views.generic import ListView, DeleteView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
-import datetime
-from datetime import datetime, timedelta
+# import datetime
+from datetime import datetime, timedelta, date
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from .forms import RenewBookForm, BookForm, LendBookForm
@@ -54,7 +54,7 @@ def index(request):
 
 class BookListView(generic.ListView):
     model = Book    # modelo que se va a utilizar para ver una lista de libros, viene enlazaco desde catalog/urls.py/views.booklistview y conectado con book_list.html
-    paginate_by = 5 # esto nos hace la paginacion, movernos entre 1 o varias paginas..
+    paginate_by = 10 # esto nos hace la paginacion, movernos entre 1 o varias paginas..
 
 
 class BookDetailView(generic.DetailView):
@@ -167,7 +167,7 @@ def renew_book_librarian(request, pk):
 
     # If this is a GET (or any other method) create the default form.
     else:
-        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        proposed_renewal_date = date.today() + timedelta(weeks=3)
         form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
 
     return render(request, 'catalog/book_renew_librarian.html', {'form': form, 'bookinst':book_inst})
@@ -264,7 +264,7 @@ class BookCreateWithInstance(PermissionRequiredMixin, CreateView):
 
 
 # Vista para mostrar la lista de libros para bibliotecarios, pretendo crearla para que solo ellos puedan eliminar
-#  libros desde ahí
+
 class BookListViewForLibrarians(PermissionRequiredMixin, ListView):
     model = Book
     template_name = 'catalog/book_list_for_librarians.html'  # Nueva plantilla para la vista de libros para bibliotecarios
@@ -328,3 +328,23 @@ def lend_book_librarian(request, pk):
         'form': form,
         'bookinst': book_inst
     })
+
+
+# ------------------- VISTA PARA MARCAR LIBRO DEVUELTO -------------------
+@permission_required('catalog.can_mark_returned')
+def mark_book_returned(request, pk):
+    """
+    View function for marking a specific BookInstance as returned
+    """
+    book_inst = get_object_or_404(BookInstance, pk=pk)
+
+    if request.method == 'POST':
+        # Cambiar el estado del libro a "Available"
+        book_inst.status = 'a'
+        book_inst.borrower = None
+        book_inst.due_back = None
+        book_inst.save()
+
+        return HttpResponseRedirect(reverse('all-borrowed'))
+
+    return render(request, 'catalog/book_confirm_return.html', {'bookinst': book_inst})
