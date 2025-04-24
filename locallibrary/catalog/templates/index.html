@@ -1,24 +1,51 @@
 {% extends "base_generic.html" %}
 
-
 {% block content %}
-
-<h1>Local Library Home</h1>
-
-  <p>Welcome to <em>LocalLibrary</em>, a very basic Django website developed as a tutorial example on the Mozilla Developer Network.</p>
-
-<h2>Dynamic content</h2>
-
-  <p>The library has the following record counts:</p>
-  <ul>
-    <li><strong>Books:</strong> {{ num_books }}</li>
-    <li><strong>Copies:</strong> {{ num_instances }}</li>
-    <li><strong>Copies available:</strong> {{ num_instances_available }}</li>
-    <li><strong>Authors:</strong> {{ num_authors }}</li>
-  </ul>
-
-  <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
-
- 
-
+<div class="content-wrapper">
+  <div class="header">
+      <h1>Local Library Home</h1>
+      <p>Welcome to <em>LocalLibrary</em>, a very basic Django website developed as a tutorial example on the Mozilla Developer Network.</p>
+  </div>
+  
+  <h2 class="section-title">Dynamic content</h2>
+  <p class="section-intro">The library has the following record counts:</p>
+  
+  <div class="cards-grid">
+      <div class="stat-card">
+          <div class="stat-header">Books</div>
+          <div class="stat-body">
+              <div class="stat-value">{{ num_books }}</div>
+              <div class="stat-label">Total in catalog</div>
+          </div>
+      </div>
+      
+      <div class="stat-card">
+          <div class="stat-header">Copies</div>
+          <div class="stat-body">
+              <div class="stat-value">{{ num_instances }}</div>
+              <div class="stat-label">Total copies</div>
+          </div>
+      </div>
+      
+      <div class="stat-card">
+          <div class="stat-header">Available</div>
+          <div class="stat-body">
+              <div class="stat-value">{{ num_instances_available }}</div>
+              <div class="stat-label">Copies available</div>
+          </div>
+      </div>
+      
+      <div class="stat-card">
+          <div class="stat-header">Authors</div>
+          <div class="stat-body">
+              <div class="stat-value">{{ num_authors }}</div>
+              <div class="stat-label">Registered authors</div>
+          </div>
+      </div>
+  </div>
+  
+  <div class="visits pulse">
+      You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.
+  </div>
+</div>
 {% endblock %}

@@ -2,50 +2,59 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
-  <h2 class="text-center">Crear Libro y Copias</h2>
+<h2 class="text-center mb-4">Crear Libro y Copias</h2>
 
-  <form method="post" class="form-horizontal" novalidate>
-    {% csrf_token %}
-
-    <!-- Sección del libro -->
-    <div class="panel panel-primary">
-      <div class="panel-heading"><strong>Información del Libro</strong></div>
-      <div class="panel-body">
-        {% for field in form %}
-          <div class="form-group {% if field.errors %}has-error{% endif %}">
-            <label class="control-label col-sm-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            <div class="col-sm-10">
-              {{ field }}
-              {% if field.help_text %}
-                <p class="help-block">{{ field.help_text }}</p>
-              {% endif %}
-              {% for error in field.errors %}
-                <p class="help-block"><strong>{{ error }}</strong></p>
-              {% endfor %}
-            </div>
-          </div>
-        {% endfor %}
-      </div>
+<form method="post" novalidate>
+  {% csrf_token %}
+  
+  <!-- Sección del libro -->
+  <div class="mb-4">
+    <div class="p-2 text-white" style="background-color: #0275d8;">
+      <strong><i class="fa fa-book me-2"></i>Información del Libro</strong>
     </div>
-
-    <!-- Sección de copias -->
-    <div class="panel panel-info">
-      <div class="panel-heading"><strong>Copias del Libro</strong></div>
-      <div class="panel-body">
-        {{ instance_formset.management_form }}
+    <div class="p-3">
+      {% for field in form %}
+        <div class="row mb-3 {% if field.errors %}is-invalid{% endif %}">
+          <label class="col-md-2 col-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <div class="col-md-10">
+            {{ field }}
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="text-danger"><strong>{{ error }}</strong></div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Sección de copias -->
+  <div class="mb-4">
+    <div class="p-2 text-white" style="background-color: #17a2b8;">
+      <strong><i class="fa fa-copy me-2"></i>Copias del Libro</strong>
+    </div>
+    <div class="p-3">
+      {{ instance_formset.management_form }}
+      
+      <div class="copies-container">
         {% for form in instance_formset %}
-          <div class="well well-sm">
+          <div class="border mb-3 p-3">
+            <div class="mb-2">
+              <strong>Copia #{{ forloop.counter }}</strong>
+            </div>
+            
             {% for field in form %}
-              <div class="form-group {% if field.errors %}has-error{% endif %}">
-                <label class="control-label col-sm-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                <div class="col-sm-10">
+              <div class="row mb-2 {% if field.errors %}is-invalid{% endif %}">
+                <label class="col-md-2 col-form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="col-md-10">
                   {{ field }}
                   {% if field.help_text %}
-                    <p class="help-block">{{ field.help_text }}</p>
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
                   {% endif %}
                   {% for error in field.errors %}
-                    <p class="help-block"><strong>{{ error }}</strong></p>
+                    <div class="text-danger"><strong>{{ error }}</strong></div>
                   {% endfor %}
                 </div>
               </div>
@@ -54,12 +63,17 @@
         {% endfor %}
       </div>
     </div>
+  </div>
+  
+  <!-- Botones de acción -->
+  <div class="text-center mb-4">
+    <button type="submit" class="btn btn-success me-2">
+      <i class="fa fa-save me-1"></i>Guardar
+    </button>
+    <a href="{% url 'books' %}" class="btn btn-secondary">
+      <i class="fa fa-times me-1"></i>Cancelar
+    </a>
+  </div>
+</form>
 
-    <!-- Botón de envío -->
-    <div class="form-group text-center">
-      <button type="submit" class="btn btn-success">Guardar</button>
-      <a href="{% url 'books' %}" class="btn btn-default">Cancelar</a>
-    </div>
-  </form>
-</div>
 {% endblock %}
